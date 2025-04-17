@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
 
-const ChatFilterButtons = () => {
-  const [activeFilter, setActiveFilter] = useState('All');
-
+const ChatFilterButtons = ({ activeFilter, onFilterChange }) => {
   const filters = ['All', 'Unread', 'Archived', 'Blocked'];
 
   return (
@@ -15,7 +13,7 @@ const ChatFilterButtons = () => {
               ? 'bg-orange-500 text-white' 
               : 'bg-gray-100 text-gray-700'} 
             focus:outline-none`}
-          onClick={() => setActiveFilter(filter)}
+          onClick={() => onFilterChange(filter)}
         >
           {filter}
         </button>

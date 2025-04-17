@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import logo from "../assets/logo.png";
 import { useNavigate } from "react-router-dom";
 import authService from "../../services/auth";
-import { Button } from "@nextui-org/react";
+import { Button } from "@heroui/react";
 import ErrorPopup from "./ui/ErrorPopup";
 import {
   setUser,
@@ -11,6 +11,7 @@ import {
   clearError,
 } from "../feature/authSlice.js";
 import { useDispatch } from "react-redux";
+import status from "http-status";
 
 const SignUpPage = () => {
   const [formData, setFormData] = useState({
@@ -21,12 +22,44 @@ const SignUpPage = () => {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [isErrorPopupOpen, setIsErrorPopupOpen] = useState(false);
+  const [usernameMessage, setUsernameMessage] = useState("");
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+
+    if (name === "username") {
+      if (value.length < 3) {
+        setUsernameMessage("Too short");
+      } else if (/^\d/.test(value)) {
+        setUsernameMessage("Cannot start with a number");
+      } else {
+        setUsernameMessage("");
+        debounceCheckUsername(value);
+      }
+    }
+
+    setFormData({ ...formData, [name]: value });
   };
+
+  const debounceCheckUsername = React.useCallback(
+    (() => {
+      let timeout;
+      return (username) => {
+        clearTimeout(timeout);
+        timeout = setTimeout(async () => {
+          try {
+            const response = await authService.checkUser(username);
+            setUsernameMessage(response.available ? "Username is available" : "Username is already taken");
+          } catch (error) {
+            setUsernameMessage("Error checking username");
+          }
+        }, 800);
+      };
+    })(),
+    []
+  );
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -35,12 +68,12 @@ const SignUpPage = () => {
     try {
       const response = await authService.createUser(formData);
       dispatch(setAuthStatus(true))
-      if (response.uid) {
-        dispatch(setUser(response));
-        navigate(`/${response.username}`);
+      if (response.status === status.CREATED) {
+        dispatch(setUser(response.data));
+        navigate(`/${response.data.username}`);
         setIsLoading(false);
       } else {
-        dispatch(setError(response));
+        dispatch(setError(response.error));
         setIsErrorPopupOpen(true);
       }
     } catch (error) {
@@ -81,6 +114,11 @@ const SignUpPage = () => {
               onChange={handleChange}
               required
             />
+            {formData.username && (
+              <p className={`text-sm ${usernameMessage === "Username is available" ? "text-green-500" : "text-red-500"}`}>
+                {usernameMessage}
+              </p>
+            )}
             <input
               type="password"
               name="password"
@@ -101,7 +139,7 @@ const SignUpPage = () => {
               <option value="other">Other</option>
             </select>
             <Button
-            isLoading={isLoading}
+              isLoading={isLoading}
               type="submit"
               size="lg"
               color="primary"
@@ -109,21 +147,9 @@ const SignUpPage = () => {
             >
               Sign Up
             </Button>
-            {/* <button
-            type="submit"
-            className="w-full bg-orange-500 text-white rounded-lg px-4 py-3 font-bold hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-opacity-50 transition-colors"
-          >
-            Sign Up
-          </button> */}
           </form>
-          {/* <button
-          onClick={() => navigate("/login")}
-          className="w-full mt-4 text-orange-500 font-semibold hover:text-orange-600 focus:outline-none"
-        >
-          Login
-        </button> */}
           <Button
-            onClick={() => navigate("/login")}
+            onPress={() => navigate("/login")}
             color="primary"
             variant="light"
             className="mt-2 w-full font-semibold"

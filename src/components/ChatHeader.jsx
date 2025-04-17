@@ -8,8 +8,6 @@ const ChatHeader = ({ onBack, showBackButton, user, socket, currentUser }) => {
   const [isTyping, setIsTyping] = useState(false);
 
   useEffect(() => {
-    console.log(user);
-    
     if (socket) {
       const handleGetUsers = (activeUsers) => {
         if (activeUsers.some(u => u.userId === user.id)) {

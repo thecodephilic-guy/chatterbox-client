@@ -2,7 +2,7 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
 import { Provider } from "react-redux";
-import { NextUIProvider } from "@nextui-org/react";
+import {HeroUIProvider} from '@heroui/react';
 import {
   Route,
   RouterProvider,
@@ -25,7 +25,7 @@ const router = createBrowserRouter(
         <Route path="" element={<SignUpPage />} />
         <Route path="login" element={<LoginPage />} />
         <Route path=":username" element={<App />} />
-        <Route path="test" element={<ChatHeader />} />{" "}
+        <Route path="test" element={<App />} />{" "}
         {/* This is a testing route not meant for production */}
       </Route>
     </>
@@ -35,9 +35,9 @@ const router = createBrowserRouter(
 createRoot(document.getElementById("root")).render(
   <Provider store={store}>
     <StrictMode>
-      <NextUIProvider>
+      <HeroUIProvider>
         <RouterProvider router={router} />
-      </NextUIProvider>
+      </HeroUIProvider>
     </StrictMode>
   </Provider>
 );

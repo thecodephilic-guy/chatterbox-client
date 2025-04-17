@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const baseURL = "http://localhost:8080/api/";
+const baseURL = "http://localhost:8080";
 
 class Auth {
   constructor() {
@@ -9,7 +9,7 @@ class Auth {
 
   async createUser(userData) {
     try {
-      const response = await axios.post(`${baseURL}auth/register/`, userData, {
+      const response = await axios.post(`${baseURL}/auth/signup/`, userData, {
         headers: {
           "Content-Type": "application/json",
         },
@@ -22,7 +22,7 @@ class Auth {
 
   async loginUser(userData){
     try{
-        const response = await axios.post(`${baseURL}auth/login/`, userData, {
+        const response = await axios.post(`${baseURL}/auth/login/`, userData, {
             headers: {
                 "Content-Type": "application/json",
             }
@@ -30,6 +30,19 @@ class Auth {
         return response.data;
     }catch(error){
         return error.response.data;
+    }
+  }
+
+  async checkUser(username){
+    try{
+      const response = await axios.get(`${baseURL}/users/check-username?username=${username}`, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      return response.data;
+    }catch(error){
+      return error.response.data;
     }
   }
 }

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import authService from "../../services/auth";
-import { Button } from "@nextui-org/react";
+import { Button } from "@heroui/react";
 import ErrorPopup from "./ui/ErrorPopup.jsx";
 import {
   setUser,
@@ -10,6 +10,7 @@ import {
   clearError,
 } from "../feature/authSlice.js";
 import { useDispatch } from "react-redux";
+import status from "http-status";
 
 const LoginPage = () => {
   const [formData, setFormData] = useState({
@@ -32,14 +33,12 @@ const LoginPage = () => {
     try {
       const response = await authService.loginUser(formData);
       dispatch(setAuthStatus(true))
-
-      if (response.uid) {
-        dispatch(setUser(response));
-        navigate(`/${response.username}`);
+      if (response.status === status.OK) {
+        dispatch(setUser(response.data));
+        navigate(`/${response.data.username}`);
         setIsLoading(false);
       } else {
-
-        dispatch(setError(response));
+        dispatch(setError(response.error));
         setIsErrorPopupOpen(true)
       }
     } catch (error) {
