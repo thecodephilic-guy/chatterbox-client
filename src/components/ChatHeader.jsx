@@ -2,15 +2,19 @@ import React, { useState, useEffect } from "react";
 import { GoDotFill } from "react-icons/go";
 import { IoIosArrowBack } from "react-icons/io";
 import { maleAvatar, femaleAvatar } from "../../public/logos";
+import socket from "../../services/socket";
 
-const ChatHeader = ({ onBack, showBackButton, user, socket, currentUser }) => {
+const ChatHeader = ({ onBack, showBackButton, selectedUser, currentUser }) => {
   const [isOnline, setIsOnline] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
-
+  const [onlineUsers, setOnlineUsers] = useState(null);
+  
   useEffect(() => {
     if (socket) {
       const handleGetUsers = (activeUsers) => {
-        if (activeUsers.some(u => u.userId === user.id)) {
+        setOnlineUsers(activeUsers)
+        
+        if (activeUsers.some(user => user.userId === selectedUser?.id)) {
           setIsOnline(true);
         } else {
           setIsOnline(false);
@@ -20,13 +24,13 @@ const ChatHeader = ({ onBack, showBackButton, user, socket, currentUser }) => {
       socket.on('get-users', handleGetUsers);
 
       socket.on('user-typing', (typingUserId) => {
-        if (typingUserId === user.id) {
+        if (typingUserId === selectedUser.id) {
           setIsTyping(true);
         }
       });
 
       socket.on('user-stop-typing', (typingUserId) => {
-        if (typingUserId === user.id) {
+        if (typingUserId === selectedUser.id) {
           setIsTyping(false);
         }
       });
@@ -37,7 +41,7 @@ const ChatHeader = ({ onBack, showBackButton, user, socket, currentUser }) => {
         socket.off('user-stop-typing');
       };
     }
-  }, [socket, user]);
+  }, [selectedUser, onlineUsers]);
 
   return (
     <div className="flex items-center p-4 border-b border-gray-200 bg-gray-100 w-full fixed top-0">
@@ -49,7 +53,7 @@ const ChatHeader = ({ onBack, showBackButton, user, socket, currentUser }) => {
         )}
         <div className="relative">
           <img
-            src={user.gender === "male" ? maleAvatar : femaleAvatar}
+            src={selectedUser.gender === "male" ? maleAvatar : femaleAvatar}
             alt="Avatar"
             className="w-9 h-9 rounded-full"
           />
@@ -58,7 +62,7 @@ const ChatHeader = ({ onBack, showBackButton, user, socket, currentUser }) => {
 
       <div className="ml-3">
         <div className="flex items-center">
-          <h2 className="text-sm font-bold text-gray-800">{user.name}</h2>
+          <h2 className="text-sm font-bold text-gray-800">{selectedUser.name}</h2>
           {isOnline && (
             <div className="ml-2">
               <GoDotFill color="#22c55e" />

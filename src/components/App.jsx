@@ -8,6 +8,7 @@ import apiService from "../../services/api";
 import { useSelector } from "react-redux";
 import status from "http-status";
 import { Spinner } from "@heroui/react";
+import socket from "../../services/socket";
 import { RiChatNewFill } from "react-icons/ri";
 
 const App = () => {
@@ -22,7 +23,19 @@ const App = () => {
   const [filteredUsers, setFilteredUsers] = useState([]);
   const currentUser = useSelector((state) => state.auth.user);
   const authStatus = useSelector((state) => state.auth.authStatus);
-  const socket = useRef();
+
+  useEffect(() => {
+    if (!socket.connected) {
+      socket.connect(); // Connect only once
+    }
+  
+    socket.emit("add-new-user", currentUser.id);
+  
+    return () => {
+      socket.disconnect(); // Cleanup on unmount
+    };
+  }, [currentUser]);
+  
 
   const getUserChats = async () => {
     try {
@@ -198,8 +211,7 @@ const App = () => {
             <ChatHeader
               onBack={handleBackToList}
               showBackButton={selectedChat !== null}
-              user={selectedChat}
-              socket={socket.current}
+              selectedUser={selectedChat}
               currentUser={currentUser}
             />
           )}

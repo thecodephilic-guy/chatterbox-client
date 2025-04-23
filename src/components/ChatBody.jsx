@@ -4,7 +4,7 @@ import { LuSendHorizontal } from "react-icons/lu";
 import useConversation from "../hooks/useConversation";
 import status from "http-status";
 
-const ChatBody = ({ selectedUser, currentUser}) => {
+const ChatBody = ({ selectedUser, currentUser, socket}) => {
   const {messages, loadMore, hasMore, loading} = useConversation(selectedUser?.userId);
   const [allMessages, setAllMessages] = useState([]);
   const [isChatAlreadyExists, setIsChatAlreadyExists] = useState(false);

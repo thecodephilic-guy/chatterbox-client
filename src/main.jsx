@@ -2,7 +2,7 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
 import { Provider } from "react-redux";
-import {HeroUIProvider} from '@heroui/react';
+import { HeroUIProvider } from "@heroui/react";
 import {
   Route,
   RouterProvider,
@@ -34,10 +34,10 @@ const router = createBrowserRouter(
 
 createRoot(document.getElementById("root")).render(
   <Provider store={store}>
-    <StrictMode>
-      <HeroUIProvider>
-        <RouterProvider router={router} />
-      </HeroUIProvider>
-    </StrictMode>
+    {/* <StrictMode> */}
+    <HeroUIProvider>
+      <RouterProvider router={router} />
+    </HeroUIProvider>
+    {/* </StrictMode> */}
   </Provider>
 );
