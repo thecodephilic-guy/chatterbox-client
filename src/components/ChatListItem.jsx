@@ -27,7 +27,7 @@ const ChatListItem = ({ chat, onSelect, isNewChatMode }) => {
                 chat.unreadCount > 0 ? "text-orange-500" : "text-gray-500 "
               } flex-shrink-0`}
             >
-              {timeAgo(chat.updatedAt)}
+              {chat.updatedAt && timeAgo(new Date(chat.updatedAt))}
             </span>
           </div>
         </div>

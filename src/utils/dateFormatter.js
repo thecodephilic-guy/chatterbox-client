@@ -11,8 +11,7 @@ export const timeAgo = (timestamp) => {
   const formatTime = (date) => {
     return date
       .toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true })
-      .replace('am', 'AM')
-      .replace('pm', 'PM');
+      .toUpperCase();
   };
 
   const formatDate = (date) => {

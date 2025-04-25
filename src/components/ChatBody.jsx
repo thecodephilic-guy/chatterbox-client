@@ -3,9 +3,11 @@ import apiService from "../../services/api";
 import { LuSendHorizontal } from "react-icons/lu";
 import useConversation from "../hooks/useConversation";
 import status from "http-status";
+import socket from "../../services/socket";
+import { timeAgo } from "../utils/dateFormatter";
 
-const ChatBody = ({ selectedUser, currentUser, socket}) => {
-  const {messages, loadMore, hasMore, loading} = useConversation(selectedUser?.userId);
+const ChatBody = ({ selectedUser, currentUser}) => {
+  const {messages, loadMore, hasMore, loading} = useConversation(selectedUser?.chatId);
   const [allMessages, setAllMessages] = useState([]);
   const [isChatAlreadyExists, setIsChatAlreadyExists] = useState(false);
   
@@ -25,16 +27,16 @@ const ChatBody = ({ selectedUser, currentUser, socket}) => {
     }
   }
 
-  const renderMessage = (msg) => (
-    <div
-      key={msg.id}
-      className={`mb-2 max-w-xs p-2 rounded-full text-sm ${
-        msg.senderId === currentUser?.id ? "bg-orange-500 ml-auto" : "bg-gray-200"
-      }`}
-    >
-      {msg.message}
-    </div>
-  );
+  // const renderMessage = (msg) => (
+  //   <div
+  //     key={msg.id}
+  //     className={`mb-2 max-w-xs p-2 rounded-full text-sm ${
+  //       msg.senderId === currentUser?.id ? "bg-orange-500 ml-auto" : "bg-gray-200"
+  //     }`}
+  //   >
+  //     {msg.content}
+  //   </div>
+  // );
   
   // useEffect(() => {
   //   loadChat();
@@ -43,7 +45,7 @@ const ChatBody = ({ selectedUser, currentUser, socket}) => {
   // useEffect(() => {
   //   if (socket) {
   //     socket.on("receive-message", (newMessage) => {
-  //       setMessages((prevMessages) => [...prevMessages, newMessage]);
+  //       messages.push(newMessage);
   //       scrollToBottom();
   //     });
   //   }
@@ -89,18 +91,18 @@ const ChatBody = ({ selectedUser, currentUser, socket}) => {
 
   const sendMessage = async (content) => {
     try {
-      let currentChatId = chatId;
+      let currentChatId = selectedUser.chatId;
       if (!currentChatId) {
         currentChatId = await createChat();
       }
-      const newMessage = await apiService.addMessage(currentChatId, currentUser.uid, content);
-      setAllMessages((prevMessages) => [...prevMessages, newMessage]);
+      // const newMessage = await apiService.addMessage(currentChatId, currentUser.id, content);
+      // setAllMessages((prevMessages) => [...prevMessages, newMessage]);
       
       // Send the message through socket
-      // socket.emit("send-message", {
-      //   receiverId: selectedUser.id,
-      //   message: newMessage,
-      // });
+      socket.emit("send-message", {
+        receiverId: selectedUser.id,
+        message: content,
+      });
 
       scrollToBottom();
     } catch (error) {
@@ -114,31 +116,31 @@ const ChatBody = ({ selectedUser, currentUser, socket}) => {
     }
   };
 
-  // const renderMessage = (message) => {
-  //   const isCurrentUser = message.senderId === currentUser.id;
-  //   return (
-  //     <div
-  //       key={message.id}
-  //       className={`flex ${isCurrentUser ? "justify-end" : "justify-start"} mb-4`}
-  //     >
-  //       <div
-  //         className={`max-w-[70%] rounded-lg p-3 ${
-  //           isCurrentUser ? "bg-orange-500 text-white" : "bg-gray-200"
-  //         }`}
-  //       >
-  //         <p>{message.content}</p>
-  //         <span className={`text-xs mt-1 ${isCurrentUser ? "text-gray-200" : "text-gray-500"}`}>
-  //           {timeAgo(message.updatedAt)}
-  //         </span>
-  //       </div>
-  //     </div>
-  //   );
-  // };
+  const renderMessage = (message) => {
+    const isCurrentUser = message.senderId === currentUser.id;
+    return (
+      <div
+        key={message.id}
+        className={`flex ${isCurrentUser ? "justify-end" : "justify-start"} mb-4`}
+      >
+        <div
+          className={`max-w-[70%] rounded-lg p-3 ${
+            isCurrentUser ? "bg-orange-500 text-white" : "bg-gray-200"
+          }`}
+        >
+          <p>{message.content}</p>
+          <span className={`text-xs mt-1 ${isCurrentUser ? "text-gray-200" : "text-gray-500"}`}>
+            {timeAgo(message.createdAt)}
+          </span>
+        </div>
+      </div>
+    );
+  };
   const handleTyping = (e) => {
     if (e.target.value.length > 0) {
-      socket.emit('user-typing', { userId: currentUser.uid, receiverId: selectedUser.id });
+      socket.emit('user-typing', { userId: currentUser.id, receiverId: selectedUser.id });
     } else {
-      socket.emit('user-stop-typing', { userId: currentUser.uid, receiverId: selectedUser.id });
+      socket.emit('user-stop-typing', { userId: currentUser.id, receiverId: selectedUser.id });
     }
   };
 

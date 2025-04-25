@@ -1,5 +1,4 @@
 import axios from "axios";
-import { mockConversation } from "./mocks.js";
 
 const baseURL = "http://localhost:8080";
 
@@ -8,29 +7,23 @@ class Api {
     this.baseURL = baseURL;
   }
 
-  async fetchConversation(userId, page =  1, pageSize = 10) {
-    try {
-      //simulate API call with pagination
-      const allMessages = mockConversation.filter(
-        msg => (msg.senderId === userId || msg.receiverId === userId)
-      );
-    
-      const start = (page - 1) * pageSize;
-      const paginated = allMessages.slice(start, start + pageSize);
-
-      //simulate a delay
-      await new Promise(resolve => setTimeout(resolve, 500));
-
-      return {
-        data : paginated,
-        hasMore: start + pageSize < allMessages.length,
-      };
-    }
-    catch (error) {
-      console.error("Error fetching conversation:", error);
-      throw error;
-    }
-  }
+  // async fetchConversation(userId, page = 1, pageSize = 10) {
+  //   try {
+  //     const response = await axios.get(`${baseURL}/conversations/${userId}`, {
+  //       params: {
+  //         page: page,
+  //         pageSize: pageSize,
+  //       },
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //     });
+  //     return response.data;
+  //   } catch (error) {
+  //     console.error("Error fetching conversation:", error);
+  //     throw error.response ? error.response.data : error;
+  //   }
+  // }
 
   //User APIs:
 
@@ -72,7 +65,7 @@ class Api {
       return error.response.data;
     }
   }
-
+  
   //Chat APIs:
   async userChats(loggedInUserId) {
     try{
@@ -122,7 +115,7 @@ class Api {
   //Message APIs:
   async getMessages(chatId){
     try{
-      const response = await axios.get(`${baseURL}messages/${chatId}/`, {
+      const response = await axios.get(`${baseURL}/messages/${chatId}/`, {
         headers: {
           "Content-Type": "application/json",
         },

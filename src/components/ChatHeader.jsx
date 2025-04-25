@@ -7,12 +7,10 @@ import socket from "../../services/socket";
 const ChatHeader = ({ onBack, showBackButton, selectedUser, currentUser }) => {
   const [isOnline, setIsOnline] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
-  const [onlineUsers, setOnlineUsers] = useState(null);
   
   useEffect(() => {
     if (socket) {
       const handleGetUsers = (activeUsers) => {
-        setOnlineUsers(activeUsers)
         
         if (activeUsers.some(user => user.userId === selectedUser?.id)) {
           setIsOnline(true);
@@ -41,7 +39,7 @@ const ChatHeader = ({ onBack, showBackButton, selectedUser, currentUser }) => {
         socket.off('user-stop-typing');
       };
     }
-  }, [selectedUser, onlineUsers]);
+  }, [selectedUser]);
 
   return (
     <div className="flex items-center p-4 border-b border-gray-200 bg-gray-100 w-full fixed top-0">

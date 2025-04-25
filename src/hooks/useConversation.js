@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import apiService from "../../services/api.js";
 
-export default function useConversation(activeUserId) {
+export default function useConversation(chatId) {
   
   const [messages, setMessages] = useState([]);
   const [page, setPage] = useState(1);
@@ -9,27 +9,23 @@ export default function useConversation(activeUserId) {
   const [loading, setLoading] = useState(false);
 
   const loadMessages = useCallback(async () => {
-    if (!activeUserId || loading) return;
+    if (!chatId || loading) return;
 
     setLoading(true);
-    const { data, hasMore } = await apiService.fetchConversation(
-      activeUserId,
-      page
-    );
-
-    setMessages((prev) => [...data.reverse(), ...prev]); // prepend for scroll-up behavior
-    setHasMore(hasMore);
+    const messageResponse = await apiService.getMessages(chatId);
+    setMessages((prev) => [...messageResponse.data, ...prev]); // prepend for scroll-up behavior
+    // setHasMore(hasMore);
     setLoading(false);
-  }, [activeUserId, page]);
+  }, [chatId, page]);
 
   useEffect(() => {
-    if (activeUserId) {
+    if (chatId) {
       setMessages([]);
       setPage(1);
       setHasMore(false);
       loadMessages(); // load initial page
     }
-  }, [activeUserId, loadMessages]);
+  }, [chatId, loadMessages]);
 
   const loadMore = () => setPage((prev) => prev + 1);
 
